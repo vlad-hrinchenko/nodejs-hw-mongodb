@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import { getContactsController, getContactByIdController } from './controllers/contactsController.js';
+import contactsRouter from './routers/contacts.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 export function setupServer() {
   const app = express();
@@ -9,13 +11,11 @@ export function setupServer() {
   app.use(cors());
   app.use(pinoHttp());
 
-  // Роути
-  app.get('/contacts', getContactsController);
-  app.get('/contacts/:contactId', getContactByIdController); 
+  app.use('/contacts', contactsRouter);
 
-  app.use('*', (req, res) => {
-    res.status(404).json({ message: 'Not found' });
-  });
+  app.use(notFoundHandler); 
+  app.use(errorHandler);      
+  app.use(express.json()); 
 
   return app;
 }
