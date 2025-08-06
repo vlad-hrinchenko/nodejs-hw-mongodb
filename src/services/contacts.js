@@ -14,7 +14,7 @@ export const createContact = async (contactData) => {
 
 export const updateContactById = async (id, updateData) => {
   return await Contact.findByIdAndUpdate(id, updateData, {
-    new: true, 
+    new: true,
     runValidators: true,
   });
 };
