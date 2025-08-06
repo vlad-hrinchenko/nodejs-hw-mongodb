@@ -3,6 +3,7 @@ import {
   getAllContacts,
   getContactById,
   createContact,
+  updateContactById,
   deleteContactById,
 } from '../services/contacts.js';
 
@@ -66,11 +67,12 @@ export const updateContactByIdController = async (req, res) => {
 
 export const deleteContactByIdController = async (req, res) => {
   const { contactId } = req.params;
+
   const deleted = await deleteContactById(contactId);
 
   if (!deleted) {
     throw createError(404, 'Contact not found');
   }
 
-  res.status(204).end(); // ⛔ 204 — без тіла
+  res.status(204).end();
 };
