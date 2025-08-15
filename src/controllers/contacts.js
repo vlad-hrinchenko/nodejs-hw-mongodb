@@ -9,15 +9,29 @@ import {
 
 // GET /contacts
 export const getContactsController = async (req, res) => {
-  const { page, perPage, sortBy, sortOrder, type, isFavourite } = req.query;
+  // Пагінація з бекап-значеннями та межами
+  const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+  const perPage = Math.max(1, Math.min(100, parseInt(req.query.perPage, 10) || 10));
+
+  // Сортування (за вимогами — дозволяємо лише name)
+  const allowedSortBy = new Set(['name']);
+  const sortBy = allowedSortBy.has(String(req.query.sortBy)) ? String(req.query.sortBy) : 'name';
+  const sortOrder = req.query.sortOrder === 'desc' ? 'desc' : 'asc';
+
+  // Необов'язкові фільтри (опціональний крок)
+  const type = req.query.type;
+  const isFavourite =
+    typeof req.query.isFavourite !== 'undefined'
+      ? String(req.query.isFavourite).toLowerCase() === 'true'
+      : undefined;
 
   const result = await getContactsPaginated({
-    page: Number(page) || 1,
-    perPage: Number(perPage) || 10,
+    page,
+    perPage,
     sortBy,
     sortOrder,
     type,
-    isFavourite
+    isFavourite,
   });
 
   res.status(200).json({
@@ -73,11 +87,12 @@ export const updateContactByIdController = async (req, res) => {
 // DELETE /contacts/:contactId
 export const deleteContactByIdController = async (req, res) => {
   const { contactId } = req.params;
+
   const deleted = await deleteContactById(contactId);
 
   if (!deleted) {
     throw createError(404, 'Contact not found');
   }
 
-  res.status(204).send();
+  res.status(204).end(); // 204 без тіла
 };
