@@ -16,7 +16,7 @@ import {
 
 const router = express.Router();
 
-// GET /contacts
+// GET /contacts?page=&perPage=&sortBy=name&sortOrder=asc|desc&type=&isFavourite=
 router.get('/', ctrlWrapper(getContactsController));
 
 // GET /contacts/:contactId
@@ -30,7 +30,7 @@ router.patch(
   '/:contactId',
   isValidId,
   validateBody(updateContactSchema),
-  ctrlWrapper(updateContactByIdController)
+  ctrlWrapper(updateContactByIdController),
 );
 
 // DELETE /contacts/:contactId
