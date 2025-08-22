@@ -1,62 +1,38 @@
 import { Contact } from '../models/Contact.js';
+import createHttpError from 'http-errors';
 
-export const getAllContacts = async () => {
-  return await Contact.find();
+// GET всі контакти користувача
+export const getContacts = async (userId) => {
+  return await Contact.find({ userId });
 };
 
-export const getContactsPaginated = async ({
-  page = 1,
-  perPage = 10,
-  sortBy = 'name',
-  sortOrder = 'asc',
-  type,
-  isFavourite
-}) => {
-  const skip = (page - 1) * perPage;
-
-  const filter = {};
-
-  if (type) {
-    filter.contactType = type;
-  }
-
-  if (typeof isFavourite !== 'undefined') {
-    filter.isFavourite = isFavourite === 'true';
-  }
-
-  const totalItems = await Contact.countDocuments(filter);
-
-  const contacts = await Contact.find(filter)
-    .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-    .skip(skip)
-    .limit(perPage);
-
-  return {
-    data: contacts,
-    page,
-    perPage,
-    totalItems,
-    totalPages: Math.ceil(totalItems / perPage),
-    hasPreviousPage: page > 1,
-    hasNextPage: page < Math.ceil(totalItems / perPage),
-  };
+// GET контакт за id для конкретного користувача
+export const getContactById = async (contactId, userId) => {
+  const contact = await Contact.findOne({ _id: contactId, userId });
+  if (!contact) throw createHttpError(404, 'Contact not found');
+  return contact;
 };
 
-export const getContactById = async (id) => {
-  return await Contact.findById(id);
+// CREATE контакт з userId
+export const createContact = async (data, userId) => {
+  const newContact = await Contact.create({ ...data, userId });
+  return newContact;
 };
 
-export const createContact = async (contactData) => {
-  return await Contact.create(contactData);
+// UPDATE контакт користувача
+export const updateContact = async (contactId, data, userId) => {
+  const updatedContact = await Contact.findOneAndUpdate(
+    { _id: contactId, userId },
+    data,
+    { new: true }
+  );
+  if (!updatedContact) throw createHttpError(404, 'Contact not found');
+  return updatedContact;
 };
 
-export const updateContactById = async (id, updateData) => {
-  return await Contact.findByIdAndUpdate(id, updateData, {
-    new: true,
-    runValidators: true,
-  });
-};
-
-export const deleteContactById = async (id) => {
-  return await Contact.findByIdAndDelete(id);
+// DELETE контакт користувача
+export const deleteContact = async (contactId, userId) => {
+  const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId });
+  if (!deletedContact) throw createHttpError(404, 'Contact not found');
+  return deletedContact;
 };
