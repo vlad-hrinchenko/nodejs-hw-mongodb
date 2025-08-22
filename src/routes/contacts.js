@@ -17,22 +17,7 @@ const router = express.Router();
 // Додаємо authenticate до всіх роутів
 router.use(authenticate);
 
-// GET /contacts
-router.get('/', ctrlWrapper(getContactsController));
-// GET /contacts/:contactId
-router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
-// POST /contacts
-router.post('/', validateBody(createContactSchema), ctrlWrapper(createContactController));
-// PATCH /contacts/:contactId
-router.patch('/:contactId', isValidId, validateBody(updateContactSchema), ctrlWrapper(updateContactByIdController));
-import {
-  createContactSchema,
-  updateContactSchema,
-} from '../validation/contacts.js';
-
-const router = express.Router();
-
-// GET /contacts?page=&perPage=&sortBy=name&sortOrder=asc|desc&type=&isFavourite=
+// GET /contacts?page=&perPage=&sortBy=&sortOrder=&type=&isFavourite=
 router.get('/', ctrlWrapper(getContactsController));
 
 // GET /contacts/:contactId
@@ -46,7 +31,7 @@ router.patch(
   '/:contactId',
   isValidId,
   validateBody(updateContactSchema),
-  ctrlWrapper(updateContactByIdController),
+  ctrlWrapper(updateContactByIdController)
 );
 
 // DELETE /contacts/:contactId

@@ -1,8 +1,7 @@
 import express from 'express';
 import Joi from 'joi';
-import { register, login } from '../controllers/auth.js';
+import { register, login, refresh, logout } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
-import { refresh } from '../controllers/auth.js';
 
 const router = express.Router();
 
@@ -25,8 +24,10 @@ router.post('/register', validateBody(registerSchema), register);
 // Роут логіну
 router.post('/login', validateBody(loginSchema), login);
 
+// Роут оновлення токенів
 router.post('/refresh', refresh);
 
+// Роут логауту
 router.post('/logout', logout);
 
 export default router;

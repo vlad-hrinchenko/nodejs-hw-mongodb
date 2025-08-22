@@ -7,8 +7,9 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
 export const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw createHttpError(401, 'Authorization header missing');
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      throw createHttpError(401, 'Authorization header missing or malformed');
     }
 
     const token = authHeader.split(' ')[1];
@@ -17,10 +18,10 @@ export const authenticate = async (req, res, next) => {
     try {
       payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
     } catch (err) {
-      if (err.name === 'TokenExpiredError') {
-        throw createHttpError(401, 'Access token expired');
-      }
-      throw createHttpError(401, 'Invalid access token');
+      const message = err.name === 'TokenExpiredError'
+        ? 'Access token expired'
+        : 'Invalid access token';
+      throw createHttpError(401, message);
     }
 
     const user = await User.findById(payload.userId);
@@ -28,7 +29,7 @@ export const authenticate = async (req, res, next) => {
       throw createHttpError(401, 'User not found');
     }
 
-    req.user = user; // додаємо користувача до запиту
+    req.user = user;
     next();
   } catch (error) {
     next(error);
