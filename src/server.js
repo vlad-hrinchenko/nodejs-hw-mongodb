@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
-import contactsRouter from './routes/contacts.js';
-import authRoutes from './routes/auth.js';
+import contactsRouter from './routers/contacts.js';
+import authRoutes from './routers/auth.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import cookieParser from 'cookie-parser';

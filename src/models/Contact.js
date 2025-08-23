@@ -1,12 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const contactSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   name: { type: String, required: true },
-  email: String,
-  phone: String,
-  contactType: String,
-  isFavourite: { type: Boolean, default: false },
+  email: { type: String },
+  phone: { type: String },
+  favorite: { type: Boolean, default: false },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 });
 
-export const Contact = mongoose.model('Contact', contactSchema);
+export const Contact = mongoose.model("Contact", contactSchema);
