@@ -1,13 +1,18 @@
-import express from "express";
-import { register, login, refresh, logout } from "../controllers/auth.js";
-import { validateBody } from "../middlewares/validateBody.js";
-import { authRegisterSchema, authLoginSchema } from "../validation/auth.js";
+import express from 'express';
+import { registerController, loginController, refreshController, logoutController } from '../controllers/auth.js';
 
 const router = express.Router();
 
-router.post("/register", validateBody(authRegisterSchema), register);
-router.post("/login", validateBody(authLoginSchema), login);
-router.post("/refresh", refresh);
-router.post("/logout", logout);
+// Реєстрація нового користувача
+router.post('/register', registerController);
+
+// Логін користувача
+router.post('/login', loginController);
+
+// Оновлення сесії (оновлення токенів)
+router.post('/refresh', refreshController);
+
+// Вихід користувача (видалення сесії)
+router.post('/logout', logoutController);
 
 export default router;
