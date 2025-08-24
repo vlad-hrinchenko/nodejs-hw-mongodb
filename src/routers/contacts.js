@@ -1,22 +1,22 @@
 import express from 'express';
-import { authenticate } from '../middlewares/authenticate.js'; // твій файл
-import {
-  getContactsController,
-  getContactByIdController,
-  createContactController,
-  updateContactByIdController,
-  deleteContactByIdController,
-} from '../controllers/contacts.js';
+import validateBody from '../middlewares/validateBody.js';
+import isValidId from '../middlewares/isValidId.js';
+import { authenticate } from '../middlewares/authenticate.js';
+import { contactCreateSchema, contactUpdateSchema } from '../schemas/contactSchemas.js';
+import { getContacts } from '../controllers/contactsController.js';
+import { addContact, patchContact } from '../controllers/contacts.js';
+import { removeContactById } from '../services/contacts.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
 const router = express.Router();
 
-// Додаємо middleware на всі контакти
+// Применяем аутентификацию ко всем роутам этого маршрутизатора
 router.use(authenticate);
 
-router.get('/', getContactsController);
-router.get('/:contactId', getContactByIdController);
-router.post('/', createContactController);
-router.patch('/:contactId', updateContactByIdController);
-router.delete('/:contactId', deleteContactByIdController);
+router.get('/', ctrlWrapper(getContacts));
+router.get('/:contactId', isValidId, ctrlWrapper(getContacts));
+router.post('/', validateBody(contactCreateSchema), ctrlWrapper(addContact));
+router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWrapper(patchContact));
+router.delete('/:contactId', isValidId, ctrlWrapper(removeContactById));
 
 export default router;

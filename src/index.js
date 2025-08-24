@@ -1,16 +1,21 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
 import { setupServer } from './server.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
+import { Contact } from './models/contacts.js';
 
-const PORT = process.env.PORT || 3000;
 
-const bootstrap = async () => {
+
+config();
+
+(async () => {
   await initMongoConnection();
-  const app = setupServer();
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-};
+  // Отримаємо всіх контактів
+  const allContacts = await Contact.find();
+  console.log(allContacts);
 
-bootstrap();
+  // Запуск сервера
+  setupServer();
+
+  console.log("App is starting...");
+})();

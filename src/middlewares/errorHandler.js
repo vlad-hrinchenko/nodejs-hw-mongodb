@@ -1,16 +1,18 @@
-export const errorHandler = (err, req, res, next) => {
-  let status = err.status || 500;
-  let message = err.message || 'Something went wrong';
+import createHttpError from 'http-errors';
 
-  // Обробка помилки MongoDB для некоректного ObjectId
-  if (err.name === 'CastError') {
-    status = 400;
-    message = 'Invalid id format';
+export function errorHandler(err, req, res, next) {
+  if (createHttpError.isHttpError(err)) {
+    const status = err.status || 500;
+    res.status(status).json({
+      status,
+      message: err.message || err.name,
+      data: err,
+    });
+    return;
   }
-
-  res.status(status).json({
-    status,
-    message,
-    data: err.data || null, // Можна залишити err.message, але краще окремо
+  res.status(500).json({
+    status: 500,
+    message: 'Something went wrong',
+    data: err.message,
   });
-};
+}
