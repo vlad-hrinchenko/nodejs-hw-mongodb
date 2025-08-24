@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
-import Session from '../models/session.js';
+import User from '../models/User.js';
+import Session from '../models/Session.js';
 
 const SALT_ROUNDS = 10;
 
