@@ -15,16 +15,16 @@ export function setupServer() {
   app.use(cors());
   app.use(pino());
   app.use(express.json());
-  app.use(cookieParser());  // подключаем cookieParser до роутов!
+  app.use(cookieParser());  // підключаємо cookieParser до роутів
 
-  // Роуты
-  app.use('/auth', authRouter);        // подключаем роуты аутентификации на /auth
+  // Роути
+  app.use('/auth', authRouter);        // роути аутентифікації на /auth
   app.use('/contacts', contactsRouter);
 
-  // Обработка несуществующих маршрутов (должна идти после всех app.use)
+  // Обробка неіснуючих маршрутів
   app.use(notFoundHandler);
 
-  // Централизованный обработчик ошибок (последний middleware)
+  // Централізований обробник помилок
   app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;

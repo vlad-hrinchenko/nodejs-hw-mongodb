@@ -13,6 +13,7 @@ const router = express.Router();
 // Применяем аутентификацию ко всем роутам этого маршрутизатора
 router.use(authenticate);
 
+// Роуты контактов
 router.get('/', ctrlWrapper(getContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(getContacts));
 router.post('/', validateBody(contactCreateSchema), ctrlWrapper(addContact));

@@ -3,8 +3,6 @@ import { setupServer } from './server.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
 import { Contact } from './models/contacts.js';
 
-
-
 config();
 
 (async () => {
