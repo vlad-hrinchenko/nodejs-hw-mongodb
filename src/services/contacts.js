@@ -13,11 +13,17 @@ export const getContactsPaginated = async ({
   type,
   isFavourite
 }) => {
+  page = Number(page) < 1 ? 1 : Number(page);
+  perPage = Number(perPage) < 1 ? 10 : Number(perPage);
   const skip = (page - 1) * perPage;
-  const filter = { userId };
 
+  const filter = { userId };
   if (type) filter.contactType = type;
-  if (typeof isFavourite !== 'undefined') filter.isFavourite = isFavourite === 'true';
+  if (typeof isFavourite !== 'undefined') {
+    filter.isFavourite = typeof isFavourite === 'string' 
+      ? isFavourite.toLowerCase() === 'true' 
+      : Boolean(isFavourite);
+  }
 
   const totalItems = await Contact.countDocuments(filter);
   const contacts = await Contact.find(filter)
@@ -46,13 +52,22 @@ export const createContact = async (data, userId) => {
 };
 
 /**
+ * GET контакт за id для конкретного користувача
+ */
+export const getContactById = async (contactId, userId) => {
+  const contact = await Contact.findOne({ _id: contactId, userId });
+  if (!contact) throw createHttpError(404, 'Contact not found');
+  return contact;
+};
+
+/**
  * UPDATE контакт користувача
  */
 export const updateContact = async (contactId, data, userId) => {
   const updatedContact = await Contact.findOneAndUpdate(
     { _id: contactId, userId },
     data,
-    { new: true }
+    { new: true, runValidators: true }
   );
   if (!updatedContact) throw createHttpError(404, 'Contact not found');
   return updatedContact;
@@ -65,13 +80,4 @@ export const deleteContact = async (contactId, userId) => {
   const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId });
   if (!deletedContact) throw createHttpError(404, 'Contact not found');
   return deletedContact;
-};
-
-/**
- * GET контакт за id для конкретного користувача
- */
-export const getContactById = async (contactId, userId) => {
-  const contact = await Contact.findOne({ _id: contactId, userId });
-  if (!contact) throw createHttpError(404, 'Contact not found');
-  return contact;
 };

@@ -21,7 +21,6 @@ export async function registerController(req, res, next) {
       },
     });
   } catch (error) {
-    // Если ошибка с email уже существует, сервис должен выбросить createHttpError с 409
     next(error);
   }
 }
@@ -34,21 +33,18 @@ export async function loginController(req, res, next) {
       throw createHttpError(400, 'Missing required fields: email or password');
     }
 
-    // Попытка залогинить пользователя и создать новую сессию
     const { accessToken, refreshToken } = await authService.loginUser({ email, password }, {
       accessTokenExpiresIn: '15m',
       refreshTokenExpiresIn: '30d',
     });
 
-    // Устанавливаем refreshToken в куки (HttpOnly, secure)
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней в миллисекундах
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
     });
 
-    // Отправляем accessToken в теле ответа
     res.status(200).json({
       status: 'success',
       message: 'Successfully logged in an user!',

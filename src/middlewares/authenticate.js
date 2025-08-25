@@ -1,8 +1,6 @@
 import createHttpError from 'http-errors';
-import mongoose from 'mongoose';
-
-import Session from '../models/session.js';
-import User from '../models/user.js';
+import Session from '../models/session.js'; 
+import User from '../models/user.js';       
 
 export const authenticate = async (req, res, next) => {
   try {
@@ -35,7 +33,6 @@ export const authenticate = async (req, res, next) => {
       return next(createHttpError(401, 'User not found'));
     }
 
-    // Добавляем пользователя к запросу
     req.user = user;
 
     next();

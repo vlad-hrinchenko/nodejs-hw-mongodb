@@ -18,6 +18,6 @@ export const initMongoConnection = async () => {
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error.message);
-    process.exit(1); // Завершити процес, якщо підключення не вдалося
+    process.exit(1);
   }
 };
