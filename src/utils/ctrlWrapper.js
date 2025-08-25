@@ -1,5 +1,6 @@
 
 
+
 export function ctrlWrapper(ctrl) {
   return async (req, res, next) => {
     try {
@@ -9,3 +10,4 @@ export function ctrlWrapper(ctrl) {
     }
   };
 }
+
