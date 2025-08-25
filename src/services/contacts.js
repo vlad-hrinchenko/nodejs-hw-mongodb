@@ -102,6 +102,10 @@ export async function updateContact(userId, contactId, updateData) {
  * @param {string} contactId - ID контакта
  * @returns {Promise<Object|null>} - Удалённый контакт или null
  */
-export async function removeContactById(userId, contactId) {
-  return Contact.findOneAndDelete({ _id: contactId, userId });
-}
+export const removeContactById = async (userId, contactId) => {
+  const deletedContact = await Contact.findOneAndDelete({
+    _id: contactId,
+    userId: userId,
+  });
+  return deletedContact;
+};

@@ -12,19 +12,19 @@ export function setupServer() {
   const app = express();
 
   // Middleware
-  app.use(cors());
+  app.use(cors({ origin: true, credentials: true })); // для cookie
   app.use(pino());
   app.use(express.json());
-  app.use(cookieParser());  // подключаем cookieParser до роутов!
+  app.use(cookieParser());
 
-  // Роуты
-  app.use('/auth', authRouter);        // подключаем роуты аутентификации на /auth
-  app.use('/contacts', contactsRouter);
+  // API маршрути з префіксом /api
+  app.use('/api/auth', authRouter);
+  app.use('/api/contacts', contactsRouter);
 
-  // Обработка несуществующих маршрутов (должна идти после всех app.use)
+  // Обробка неіснуючих маршрутів
   app.use(notFoundHandler);
 
-  // Централизованный обработчик ошибок (последний middleware)
+  // Централізований обробник помилок
   app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
