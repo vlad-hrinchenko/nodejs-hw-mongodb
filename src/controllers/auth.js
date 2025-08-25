@@ -1,5 +1,7 @@
 import * as authService from '../services/auth.js';
 import createHttpError from 'http-errors';
+import { requestResetToken } from '../services/auth.js';
+import { resetPassword } from '../services/auth.js';
 
 export async function registerController(req, res, next) {
   try {
@@ -103,3 +105,21 @@ export async function logoutController(req, res, next) {
     next(error);
   }
 }
+
+export const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    message: 'Reset password email was successfully sent!',
+    status: 200,
+    data: {},
+  });
+};
+
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset!',
+    status: 200,
+    data: {},
+  });
+};

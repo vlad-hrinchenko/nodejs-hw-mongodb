@@ -6,6 +6,12 @@ const contactSchema = new mongoose.Schema({
   phone: { type: String },
   favorite: { type: Boolean, default: false },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-});
+  photo: { type: String },
+},
+  {
+    timestamps: true,
+    versionKey: false,
+  },
+);
 
 export const Contact = mongoose.model('Contact', contactSchema);
