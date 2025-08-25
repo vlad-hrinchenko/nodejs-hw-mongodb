@@ -7,12 +7,19 @@ import { getEnvVar } from '../utils/getEnvVar.js';
 export const getContacts = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
+    const {
+      page = 1,
+      perPage = 10,
+      sortBy = 'name',
+      sortOrder = 'asc',
+      type,
+      isFavourite,
+    } = req.query;
 
     const result = await contactsService.getAllContacts({
       userId,
-      page,
-      perPage,
+      page: Number(page) || 1,
+      perPage: Number(perPage) || 10,
       sortBy,
       sortOrder,
       type,
@@ -77,7 +84,6 @@ export const patchContact = async (req, res, next) => {
     const userId = req.user._id;
     const { contactId } = req.params;
     const updateData = req.body;
-    
 
     const updatedContact = await contactsService.updateContact(userId, contactId, updateData);
     if (!updatedContact) throw createError(404, 'Contact not found');
@@ -90,45 +96,30 @@ export const patchContact = async (req, res, next) => {
 
 export const removeContact = async (req, res, next) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user._id; // якщо сервіс очікує рядок — зроби .toString() скрізь однаково
     const { contactId } = req.params;
 
     const deletedContact = await contactsService.removeContactById(userId, contactId);
     if (!deletedContact) throw createError(404, 'Contact not found');
 
-    res.json({ status: 'success', message: 'Contact successfully deleted', data: deletedContact });
+    res.json({
+      status: 'success',
+      message: 'Contact successfully deleted',
+      data: deletedContact,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-export const patchStudentController = async (req, res, next) => {
-  const { studentId } = req.params;
-  const photo = req.file;
-
-  let photoUrl;
-
-  if (photo) {
-    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(photo);
-    } else {
-      photoUrl = await saveFileToUploadDir(photo);
-    }
-  }
-
-  const result = await updateStudent(studentId, {
-    ...req.body,
-    photo: photoUrl,
-  });
-
-  if (!result) {
-    next(createHttpError(404, 'Student not found'));
-    return;
-  }
-
-  res.json({
-    status: 200,
-    message: `Successfully patched a student!`,
-    data: result.student,
-  });
+/**
+ * Аліаси, якщо десь у проєкті вже використані "*Controller"-імена.
+ * Можеш залишити — це не ламає імпорти.
+ */
+export {
+  addContact as createContactController,
+  getContacts as getContactsController,
+  patchContact as updateContactByIdController,
+  removeContact as deleteContactByIdController,
+  getContactById as getContactByIdController,
 };

@@ -1,52 +1,45 @@
 import express from 'express';
-import validateBody from '../middlewares/validateBody.js';
-import isValidId from '../middlewares/isValidId.js';
-import { authenticate } from '../middlewares/authenticate.js';
-import { contactCreateSchema, contactUpdateSchema } from '../schemas/contactSchemas.js';
 import {
+  // базові назви
   getContacts,
   getContactById,
   addContact,
   patchContact,
-  removeContact
-} from '../controllers/contactsController.js';
+  removeContact,
+  // аліаси (раптом ти десь уже імпортуєш ці імена)
+  getContactsController,
+  getContactByIdController,
+  createContactController,
+  updateContactByIdController,
+  deleteContactByIdController,
+} from '../controllers/contacts.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-import { upload } from '../middlewares/multer.js';
+import { isValidId } from '../middlewares/isValidId.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import {
+  createContactSchema,
+  updateContactSchema,
+} from '../validation/contacts.js';
 
 const router = express.Router();
 
-router.use(authenticate);
-
+/**
+ * ВАРІАНТ 1 (рекомендований): використовувати реальні назви без "Controller"
+ */
 router.get('/', ctrlWrapper(getContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(getContactById));
-router.post('/', validateBody(contactCreateSchema), ctrlWrapper(addContact));
-router.patch('/:contactId', isValidId, validateBody(contactUpdateSchema), ctrlWrapper(patchContact));
+router.post('/', validateBody(createContactSchema), ctrlWrapper(addContact));
+router.patch('/:contactId', isValidId, validateBody(updateContactSchema), ctrlWrapper(patchContact));
 router.delete('/:contactId', isValidId, ctrlWrapper(removeContact));
 
-router.post(
-  '/',
-  checkRoles(ROLES.TEACHER),
-  upload.single('photo'), // додаємо цю middleware
-  validateBody(createContactSchema),
-  ctrlWrapper(createContactController),
-);
-
-router.put(
-  '/:contactId',
-  checkRoles(ROLES.TEACHER),
-  isValidId,
-  upload.single('photo'), // додаємо цю middleware
-  validateBody(createContactSchema),
-  ctrlWrapper(upsertContactController),
-);
-
-router.patch(
-  '/:contactId',
-  checkRoles(ROLES.TEACHER, ROLES.PARENT),
-  isValidId,
-  upload.single('photo'), // додаємо цю middleware
-  validateBody(updateContactSchema),
-  ctrlWrapper(patchContactController),
-);
+/**
+ * ВАРІАНТ 2 (залишив на випадок, якщо десь у коді очікуються саме *Controller-імена)
+ * Розкоментуй замість варіанта 1, якщо хочеш старі назви.
+ */
+// router.get('/', ctrlWrapper(getContactsController));
+// router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
+// router.post('/', validateBody(createContactSchema), ctrlWrapper(createContactController));
+// router.patch('/:contactId', isValidId, validateBody(updateContactSchema), ctrlWrapper(updateContactByIdController));
+// router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactByIdController));
 
 export default router;
