@@ -1,14 +1,19 @@
 import createError from 'http-errors';
 import * as contactsService from '../services/contacts.js';
 
-// GET /contacts
 export const getContacts = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { page = 1, perPage = 10, sortBy = 'name', sortOrder = 'asc', type, isFavourite } = req.query;
 
     const result = await contactsService.getAllContacts({
-      userId, page, perPage, sortBy, sortOrder, type, isFavourite
+      userId,
+      page,
+      perPage,
+      sortBy,
+      sortOrder,
+      type,
+      isFavourite,
     });
 
     res.status(200).json({
@@ -29,7 +34,6 @@ export const getContacts = async (req, res, next) => {
   }
 };
 
-// GET /contacts/:contactId
 export const getContactById = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -44,7 +48,6 @@ export const getContactById = async (req, res, next) => {
   }
 };
 
-// POST /contacts
 export const addContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -66,7 +69,6 @@ export const addContact = async (req, res, next) => {
   }
 };
 
-// PATCH /contacts/:contactId
 export const patchContact = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -82,7 +84,6 @@ export const patchContact = async (req, res, next) => {
   }
 };
 
-// DELETE /contacts/:contactId
 export const removeContact = async (req, res, next) => {
   try {
     const userId = req.user._id.toString();

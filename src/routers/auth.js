@@ -3,16 +3,16 @@ import { registerController, loginController, refreshController, logoutControlle
 
 const router = express.Router();
 
-// Регистрация нового пользователя
+
 router.post('/register', registerController);
 
-// Логин пользователя
 router.post('/login', loginController);
 
-// Обновление сессии (обновление токенов)
+
 router.post('/refresh', refreshController);
 
-// Выход пользователя (удаление сессии)
+
 router.post('/logout', logoutController);
 
 export default router;
+
