@@ -1,5 +1,7 @@
-import createHttpError from 'http-errors';
 
-export function notFoundHandler(req, res, next) {
-  next(createHttpError(404, 'Resource not found'));
+import createError from 'http-errors';
 
+export const notFoundHandler = (req, res, next) => {
+  const error = createError(404, 'Not found');
+  res.status(error.status).json({ message: error.message });
+};
