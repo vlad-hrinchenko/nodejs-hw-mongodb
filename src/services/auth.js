@@ -1,5 +1,5 @@
 import createHttpError from "http-errors";
-import { User} from '../db/models/user.Model.js';
+import { User} from '../db/models/userModel.js';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 import { Session } from "../db/models/sessionModel.js";
