@@ -1,73 +1,89 @@
-import { registerUser, loginUser, logoutUser, refreshSession } from "../services/auth.js";
-import mongoose from "mongoose";
 
-const setUpSessionCookies = (session, res) => {
-  const sessionId = session._id instanceof mongoose.Types.ObjectId
-    ? session._id.toHexString()
-    : session._id;
+import createHttpError from 'http-errors';
+import { registerUser, createSession, refreshSession, logoutSession, loginUser, logoutSessionsByUserId } from '../services/auth.js';
 
-  res.cookie("sessionId", sessionId, {
-    httpOnly: true,
-    expires: session.refreshTokenValidUntil,
-  });
-
-  res.cookie("refreshToken", session.refreshToken, {
-    httpOnly: true,
-    expires: session.refreshTokenValidUntil,
-  });
-};
-
-export const registerUserController = async( req, res) => {
+export const registerUserController = async (req, res) => {
     const user = await registerUser(req.body);
 
-    res.json({
-        status: 201,
-        message: "Successfully created User",
-    data: user,
-});
-};
+    await logoutSessionsByUserId(user._id); // remove old sessions first
 
- export const loginUserController = async( req, res) => {
-    const session = await loginUser(req.body);
+    const { accessToken, refreshToken } = await createSession(user._id);
+    const isProduction = process.env.NODE_ENV === 'production';
 
-     setUpSessionCookies(session, res);
-     res.json({
-        status: 200,
-         message: "Successfully logged User",
-         data: {
-             accessToken: session.accessToken
-     },
-     });
- };
-
-
-
-export const refreshSessionController = async (req, res, next) => {
-  try {
-
-    const { refreshToken } = req.cookies;
-    const session = await refreshSession(refreshToken);
-
-    setUpSessionCookies(session, res);
-
-    res.status(200).json({
-      status: 200,
-      message: "Successfully refreshed a session!",
-      data: { accessToken: session.accessToken },
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'strict',
     });
-  } catch (error) {
-    next(error);
-  }
+
+    res.status(201).json({
+        status: 201,
+        message: 'Successfully registered a user!',
+        data: { user, accessToken },
+    });
 };
 
-export const logoutUserController = async (req, res) => {
-  const { refreshToken } = req.cookies;
+export const refreshUserController = async (req, res) => {
+    const refreshToken =
+        req.cookies?.refreshToken ||
+        req.headers['authorization']?.replace('Bearer ', '');
 
-  if (!refreshToken) {
-    res.status(400).json({ status: 400, message: 'Missing session cookies' });
-  }
+    if (!refreshToken) {
+        throw createHttpError(401, 'No refresh token provided');
+    }
 
-  await logoutUser(refreshToken);
-  res.clearCookie('refreshToken');
-  res.status(204).send();
+    const { accessToken, refreshToken: newRefreshToken } = await refreshSession(refreshToken);
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res
+        .cookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: isProduction, // увімкнути на https
+            sameSite: 'strict',
+        })
+        .status(200)
+        .json({
+            status: 200,
+            message: 'Successfully refreshed a session!',
+            data: { accessToken },
+        });
+};
+
+export const logoutController = async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+        throw createHttpError(401, 'No refresh token provided');
+    }
+
+    await logoutSession(refreshToken);
+
+    // Cookie löschen
+    res.clearCookie('refreshToken');
+    res.status(204).end();
+};
+
+export const loginUserController = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        const { accessToken, refreshToken } = await loginUser(email, password);
+
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        // Записати refreshToken у cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction, // true на https
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
+        });
+
+        res.status(200).json({
+            status: 200,
+            message: 'Successfully logged in an user!',
+            data: { accessToken },
+        });
+    } catch (err) {
+        next(err);
+    }
 };
