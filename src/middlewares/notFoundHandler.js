@@ -1,10 +1,7 @@
-// src/middlewares/notFoundHandler.js
-import createHttpError from 'http-errors';
 
-/**
- * Middleware для обробки неіснуючих маршрутів (404)
- */
+import createError from 'http-errors';
+
 export const notFoundHandler = (req, res, next) => {
-  // Створюємо помилку 404 з повідомленням
-  next(createHttpError(404, `Resource not found - ${req.originalUrl}`));
+  const error = createError(404, 'Not found');
+  res.status(error.status).json({ message: error.message });
 };

@@ -1,83 +1,83 @@
-import { Contact } from '../models/Contact.js';
-import createHttpError from 'http-errors';
+import createHttpError from "http-errors";
+import { Contacts } from "../db/models/contactModel.js";
 
-/**
- * GET контакти користувача з пагінацією, сортуванням та фільтрами
- */
-export const getContactsPaginated = async ({
-  userId,
+const createPagination = (page, perPage, count, contacts) => {
+  const totalPages = Math.ceil(count / perPage);
+  const hasPreviousPage = page !==1 && page <= totalPages;
+  const hasNextPage = totalPages > page;
+
+ return {
+  page,
+  perPage,
+  totalItems: count,
+  totalPages,
+  hasPreviousPage,
+  hasNextPage,
+  data: contacts,
+ }
+}
+
+
+export const getAllContacts = async ({
   page = 1,
   perPage = 10,
   sortBy = 'name',
   sortOrder = 'asc',
-  type,
-  isFavourite
-}) => {
-  page = Number(page) < 1 ? 1 : Number(page);
-  perPage = Number(perPage) < 1 ? 10 : Number(perPage);
-  const skip = (page - 1) * perPage;
+  contactType,
+  isFavourite,
+  filters = {},
+  }) => {
+  const offset = (page - 1) * perPage;
 
-  const filter = { userId };
-  if (type) filter.contactType = type;
-  if (typeof isFavourite !== 'undefined') {
-    filter.isFavourite = typeof isFavourite === 'string' 
-      ? isFavourite.toLowerCase() === 'true' 
-      : Boolean(isFavourite);
+  const filter = { ...filters };
+
+  if (contactType) {
+    filter.contactType = contactType;
+  }
+  if (typeof isFavourite === 'boolean') {
+    filter.isFavourite = isFavourite;
   }
 
-  const totalItems = await Contact.countDocuments(filter);
-  const contacts = await Contact.find(filter)
-    .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-    .skip(skip)
-    .limit(perPage);
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
-  const totalPages = Math.ceil(totalItems / perPage);
+  const [contacts, contactsCount] = await Promise.all([
+    Contacts.find(filter).skip(offset).limit(perPage).sort(sort),
+    Contacts.countDocuments(filter),
+  ]);
 
-  return {
-    data: contacts,
-    page,
-    perPage,
-    totalItems,
-    totalPages,
-    hasPreviousPage: page > 1,
-    hasNextPage: page < totalPages,
-  };
+  const pagination = createPagination(page, perPage, contactsCount, contacts);
+
+  return pagination;
 };
 
-/**
- * CREATE контакт з прив'язкою до користувача
- */
-export const createContact = async (data, userId) => {
-  return Contact.create({ ...data, userId });
-};
-
-/**
- * GET контакт за id для конкретного користувача
- */
 export const getContactById = async (contactId, userId) => {
-  const contact = await Contact.findOne({ _id: contactId, userId });
-  if (!contact) throw createHttpError(404, 'Contact not found');
+  const contact = Contacts.findOne({ _id: contactId, userId });
+
+    if (!contact) {
+    throw createHttpError(404, 'Contact not found');
+  }
   return contact;
 };
 
-/**
- * UPDATE контакт користувача
- */
-export const updateContact = async (contactId, data, userId) => {
-  const updatedContact = await Contact.findOneAndUpdate(
-    { _id: contactId, userId },
-    data,
-    { new: true, runValidators: true }
-  );
-  if (!updatedContact) throw createHttpError(404, 'Contact not found');
-  return updatedContact;
+export const createContact = async (payload) => {
+  const contact = await Contacts.create(payload);
+  return contact;
 };
 
-/**
- * DELETE контакт користувача
- */
-export const deleteContact = async (contactId, userId) => {
-  const deletedContact = await Contact.findOneAndDelete({ _id: contactId, userId });
-  if (!deletedContact) throw createHttpError(404, 'Contact not found');
-  return deletedContact;
+export const updateContact = async (contactId, body, userId) => {
+  const contact = await Contacts.findOneAndUpdate(
+    { _id: contactId, userId },
+    body,
+    { new: true }
+  );
+
+  if (!contact) {
+    throw createHttpError(404, 'Contact not found');
+  }
+  return contact;
+};
+
+export const deleteContactById = async (id, userId) => {
+  const contact = await Contacts.findOneAndDelete({ _id: id, userId });
+  return contact;
 };

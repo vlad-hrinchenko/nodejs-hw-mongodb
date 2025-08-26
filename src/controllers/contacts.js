@@ -1,55 +1,90 @@
-import createError from 'http-errors';
-import * as contactsService from '../services/contacts.js';
 
-// Обновление контакта по id с учётом userId
-export const patchContact = async (req, res, next) => {
+import createHttpError from "http-errors";
+import { createContact, deleteContactById, getAllContacts, getContactById, updateContact } from "../services/contacts.js";
+
+
+export const getAllContactsController = async (req, res) => {
+    const { page = 1, perPage = 10, sortBy='name', sortOrder='asc', contactType, isFavourite } = req.query;
+    const filters = { userId: req.user._id };
+
+      if (contactType) filters.contactType = contactType;
+      if (isFavourite !== undefined) filters.isFavourite = isFavourite === 'true';
+
+        const data = await getAllContacts({
+          page: Number(page),
+          perPage: Number(perPage),
+          sortBy,
+          sortOrder,
+          contactType,
+          isFavourite,
+          filters,
+        });
+        res.status(200).json({
+            status: 200,
+            message: 'Successfully found contacts',
+            data,
+        });
+    };
+
+
+export const getContactByIdController = async (req, res, next) => {
   try {
-    const userId = req.user.id; // получаем userId из middleware authenticate
     const { contactId } = req.params;
-    const updateData = req.body;
+    const contact = await getContactById(contactId, req.user._id);
 
-    // Передаем userId первым параметром
-    const updatedContact = await contactsService.updateContact(userId, contactId, updateData);
-
-    if (!updatedContact) {
-      return res.status(404).json({ message: 'Contact not found' });
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
     }
 
-    res.json({
-      status: 'success',
-      data: updatedContact,
+    res.status(200).json({
+      status: 200,
+      message: `Successfully found contact ${contactId}`,
+      data: contact,
     });
   } catch (error) {
     next(error);
   }
 };
 
-// Создание контакта с привязкой к userId
-export async function addContact(req, res, next) {
+   export const createContactsController = async (req, res) => {
+    const contact = await createContact({
+        ...req.body,
+         userId:  req.user._id,
+        });
+
+    return  res.status(201).json({
+            status: 201,
+            message: 'Successfully created contact',
+            data: contact,
+        });
+};
+
+export const patchContactsController = async (req, res, next) => {
   try {
-    const userId = req.user.id; // или req.user._id, как у вас принято
-    const contactData = req.body;
+    const { contactId } = req.params;
+    const contact = await updateContact(contactId, req.body, req.user._id);
 
-    // Валидация обязательных полей (можно вынести в middleware)
-    if (!contactData.name) {
-      throw createError(400, 'Missing required field: name');
-    }
-    if (!contactData.phoneNumber) {
-      throw createError(400, 'Missing required field: phoneNumber');
-    }
-    if (!contactData.contactType) {
-      throw createError(400, 'Missing required field: contactType');
+    if (!contact) {
+      throw createHttpError(404, 'Contact not found');
     }
 
-    // Передаем userId первым параметром
-    const newContact = await contactsService.addContact(userId, contactData);
-
-    res.status(201).json({
-      status: 'success',
-      message: 'Successfully created a contact!',
-      data: newContact,
+    return res.status(200).json({
+      status: 200,
+      message: `Successfully updated contact with id ${contactId}`,
+      data: contact,
     });
   } catch (error) {
     next(error);
   }
-}
+};
+
+export const deleteContactController = async (req, res) => {
+        const { contactId } = req.params;
+        const userId = req.user._id;
+        const deleted = await deleteContactById(contactId, userId);
+
+        if (!deleted) {
+            throw createHttpError(404, "Contact not found");
+        }
+        res.status(204).send();
+};
