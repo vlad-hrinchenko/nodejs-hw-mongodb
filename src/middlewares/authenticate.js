@@ -1,7 +1,7 @@
-
 import jwt from 'jsonwebtoken';
 import createHttpError from 'http-errors';
 import { UsersCollection } from '../db/models/user.js';
+import { SessionsCollection } from '../db/models/session.js'; // <-- додаємо
 
 export const authenticate = async (req, res, next) => {
     try {
@@ -29,15 +29,19 @@ export const authenticate = async (req, res, next) => {
             throw createHttpError(401, 'Invalid access token');
         }
 
-        // Знайдемо користувача
+        // 🔹 Перевіряємо, чи існує сесія з цим токеном
+        const session = await SessionsCollection.findOne({ accessToken: token });
+        if (!session) {
+            throw createHttpError(401, 'Session expired or invalid');
+        }
+
+        // 🔹 Знаходимо користувача
         const user = await UsersCollection.findById(payload.userId).select('-password');
         if (!user) {
             throw createHttpError(401, 'User not found');
         }
 
-        // Додаємо user до req
         req.user = user;
-
         next();
     } catch (error) {
         next(error);
