@@ -51,16 +51,24 @@ export const refreshUserController = async (req, res) => {
 
 export const logoutController = async (req, res) => {
     const refreshToken = req.cookies?.refreshToken;
+
     if (!refreshToken) {
         throw createHttpError(401, 'No refresh token provided');
     }
 
+    // Видаляємо сесію з бази
     await logoutSession(refreshToken);
 
-    // Cookie löschen
-    res.clearCookie('refreshToken');
+    // Видаляємо cookie
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+
     res.status(204).end();
 };
+
 
 export const loginUserController = async (req, res, next) => {
     try {
