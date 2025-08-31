@@ -49,5 +49,4 @@ router.patch(
   ctrlWrapper(updateContactController),
 );
 
-
 export default router;

@@ -1,3 +1,4 @@
+
 import { UsersCollection } from '../db/models/user.js';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
@@ -17,13 +18,16 @@ export const registerUser = async (payload) => {
     if (existingUser) {
         throw createHttpError(409, 'Email in use');
     }
-
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create new user
     const newUser = await UsersCollection.create({
         name,
         email,
         password: hashedPassword,
+
     });
 
     const userObject = newUser.toObject();
@@ -61,6 +65,10 @@ export const refreshSession = async (refreshToken) => {
     const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
     const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
+    const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+    const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+
+    // 1. Знаходимо сесію
     const session = await SessionsCollection.findOne({ refreshToken });
     if (!session) {
         throw createHttpError(401, 'Invalid refresh token');
@@ -69,6 +77,7 @@ export const refreshSession = async (refreshToken) => {
     if (new Date() > session.refreshTokenValidUntil) {
         throw createHttpError(401, 'Refresh token expired');
     }
+
 
     await SessionsCollection.deleteOne({ _id: session._id });
 
@@ -83,7 +92,7 @@ export const refreshSession = async (refreshToken) => {
         REFRESH_TOKEN_SECRET,
         { expiresIn: '30d' }
     );
-
+  
     const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
     const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
