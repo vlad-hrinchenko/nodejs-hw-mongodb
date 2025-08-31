@@ -95,3 +95,78 @@ export const loginUserController = async (req, res, next) => {
         next(err);
     }
 };
+
+export const sendResetEmailController = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        await sendResetPasswordEmail(email);
+
+        res.status(200).json({
+            status: 200,
+            message: 'Reset password email has been successfully sent.',
+            data: {},
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const resetPasswordController = async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+
+        await resetPasswordWithToken(token, password);
+
+        res.status(200).json({
+            status: 200,
+            message: 'Password has been successfully reset.',
+            data: {},
+
+export const logoutController = async (req, res) => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+        throw createHttpError(401, 'No refresh token provided');
+    }
+
+    // Видаляємо сесію з бази
+    await logoutSession(refreshToken);
+
+    // Видаляємо cookie
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+    });
+
+    res.status(204).end();
+};
+
+
+export const loginUserController = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        const { accessToken, refreshToken } = await loginUser(email, password);
+
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        // Записати refreshToken у cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction, // true на https
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
+        });
+
+        res.status(200).json({
+            status: 200,
+            message: 'Successfully logged in an user!',
+            data: { accessToken }
+        });
+    } catch (err) {
+        next(err);
+    }
+};
