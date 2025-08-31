@@ -132,6 +132,7 @@ export const sendResetEmailController = async (req, res, next) => {
 };
 
 export const resetPasswordController = async (req, res, next) => { 
+
     try {
         const { token, password } = req.body;
 
@@ -144,5 +145,6 @@ export const resetPasswordController = async (req, res, next) => {
         });
     } catch (error) {
         next(error);
+
     }
 };
