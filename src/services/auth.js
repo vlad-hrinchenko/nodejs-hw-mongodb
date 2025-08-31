@@ -1,30 +1,31 @@
-
 import { UsersCollection } from '../db/models/user.js';
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { SessionsCollection } from '../db/models/session.js';
+import { sendMail } from '../utils/sendMail.js';
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { TEMPLATES_DIR, SMTP } from '../constants/index.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
 export const registerUser = async (payload) => {
     const { email, password, name } = payload;
 
-    // Check if user exists
     const existingUser = await UsersCollection.findOne({ email });
     if (existingUser) {
         throw createHttpError(409, 'Email in use');
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
     const newUser = await UsersCollection.create({
         name,
         email,
         password: hashedPassword,
     });
 
-    // Remove password from response
     const userObject = newUser.toObject();
     delete userObject.password;
 
@@ -56,28 +57,21 @@ export const createSession = async (userId) => {
     return { accessToken, refreshToken };
 };
 
-
-
 export const refreshSession = async (refreshToken) => {
-
     const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
     const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
-    // 1. Знаходимо сесію
     const session = await SessionsCollection.findOne({ refreshToken });
     if (!session) {
         throw createHttpError(401, 'Invalid refresh token');
     }
 
-    // 2. Перевіряємо, чи ще дійсний
     if (new Date() > session.refreshTokenValidUntil) {
         throw createHttpError(401, 'Refresh token expired');
     }
 
-    // 3. Видаляємо стару сесію
     await SessionsCollection.deleteOne({ _id: session._id });
 
-    // 4. Створюємо нові токени
     const accessToken = jwt.sign(
         { userId: session.userId },
         ACCESS_TOKEN_SECRET,
@@ -90,7 +84,6 @@ export const refreshSession = async (refreshToken) => {
         { expiresIn: '30d' }
     );
 
-    // 5. Зберігаємо нову сесію
     const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
     const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
@@ -102,7 +95,6 @@ export const refreshSession = async (refreshToken) => {
         refreshTokenValidUntil,
     });
 
-    // 6. Повертаємо результат
     return {
         accessToken,
         refreshToken: newRefreshToken,
@@ -110,7 +102,6 @@ export const refreshSession = async (refreshToken) => {
 };
 
 export const logoutSession = async (refreshToken) => {
-    // Session anhand des Refresh Tokens finden und löschen
     const session = await SessionsCollection.findOneAndDelete({ refreshToken });
     if (!session) {
         throw createHttpError(401, 'Invalid session');
@@ -120,7 +111,6 @@ export const logoutSession = async (refreshToken) => {
 export const logoutSessionsByUserId = async (userId) => {
     await SessionsCollection.deleteMany({ userId });
 };
-
 
 export const loginUser = async (email, password) => {
     const user = await UsersCollection.findOne({ email });
@@ -141,4 +131,94 @@ export const loginUser = async (email, password) => {
     delete userObject.password;
 
     return { user: userObject, accessToken, refreshToken };
+};
+
+// --- ВИКОРИСТАННЯ sendMail ДЛЯ ВІДПРАВКИ ЛИСТА ---
+export const sendResetPasswordEmail = async (email) => {
+    const user = await UsersCollection.findOne({ email });
+    if (!user) {
+        throw createHttpError(404, 'User not found!');
+    }
+
+    const JWT_SECRET = process.env.JWT_SECRET;
+    const APP_DOMAIN = process.env.APP_DOMAIN;
+
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '5m' });
+
+    const resetLink = `${APP_DOMAIN}/reset-password?token=${token}`;
+
+    // Використовуємо sendMail замість прямого transporter
+    const wasSent = await sendMail({
+        to: email,
+        subject: 'Password reset',
+        html: `<p>To reset your password click <a href="${resetLink}">here</a><br/>Або скопіюйте це посилання в браузер:<br/>${resetLink}</p>`
+    });
+
+    if (!wasSent) {
+        throw createHttpError(500, 'Failed to send the email, please try again later.');
+    }
+
+    return true;
+};
+
+export const resetPasswordWithToken = async (token, newPassword) => {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    let payload;
+    try {
+        payload = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+        throw createHttpError(401, 'Token is expired or invalid.');
+    }
+
+    const user = await UsersCollection.findOne({ email: payload.email });
+    if (!user) {
+        throw createHttpError(404, 'User not found!');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    await logoutSessionsByUserId(user._id);
+
+    return true;
+};
+
+export const requestResetToken = async (email) => {
+  const user = await UsersCollection.findOne({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  const resetToken = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    getEnvVar('JWT_SECRET'),
+    {
+      expiresIn: '15m',
+    },
+  );
+
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    name: user.name,
+    link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+  });
+
+  await sendMail({
+    to: email,
+    subject: 'Reset your password',
+    html,
+  });
 };

@@ -95,3 +95,36 @@ export const loginUserController = async (req, res, next) => {
         next(err);
     }
 };
+
+export const sendResetEmailController = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        await sendResetPasswordEmail(email);
+
+        res.status(200).json({
+            status: 200,
+            message: 'Reset password email has been successfully sent.',
+            data: {},
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+
+export const resetPasswordController = async (req, res, next) => {
+    try {
+        const { token, password } = req.body;
+
+        await resetPasswordWithToken(token, password);
+
+        res.status(200).json({
+            status: 200,
+            message: 'Password has been successfully reset.',
+            data: {},
+        });
+    } catch (err) {
+        next(err);
+    }
+};

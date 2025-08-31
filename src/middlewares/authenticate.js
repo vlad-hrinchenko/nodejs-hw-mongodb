@@ -3,6 +3,13 @@ import createHttpError from 'http-errors';
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js'; // <-- додаємо
 
+export function checkRoles(roles = []) {
+  return (req, res, next) => {
+    // TODO: Додати реальну перевірку ролей користувача
+    next();
+  };
+}
+
 export const authenticate = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
