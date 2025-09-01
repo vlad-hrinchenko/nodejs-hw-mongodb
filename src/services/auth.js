@@ -20,7 +20,6 @@ export const registerUser = async (payload) => {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
     const newUser = await UsersCollection.create({
@@ -62,9 +61,6 @@ export const createSession = async (userId) => {
 };
 
 export const refreshSession = async (refreshToken) => {
-    const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-    const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
-
     const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
     const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
