@@ -1,18 +1,14 @@
-import cloudinary from 'cloudinary';
+
+import path from 'node:path';
 import fs from 'node:fs/promises';
+import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from '../constants/index.js';
 import { getEnvVar } from './getEnvVar.js';
-import { CLOUDINARY } from '../constants/index.js';
 
-// Конфігурація Cloudinary
-cloudinary.v2.config({
-  secure: true,
-  cloud_name: getEnvVar(CLOUDINARY.CLOUD_NAME),
-  api_key: getEnvVar(CLOUDINARY.API_KEY),
-  api_secret: getEnvVar(CLOUDINARY.API_SECRET),
-});
+export const saveFileToUploadDir = async (file) => {
+  await fs.rename(
+    path.join(TEMP_UPLOAD_DIR, file.filename),
+    path.join(UPLOAD_DIR, file.filename),
+  );
 
-export const saveFileToCloudinary = async (file) => {
-  const response = await cloudinary.v2.uploader.upload(file.path);
-  await fs.unlink(file.path); // Видаляємо локальний файл після завантаження
-  return response.secure_url;
+  return `${getEnvVar('APP_DOMAIN')}/uploads/${file.filename}`;
 };
