@@ -13,10 +13,16 @@ cloudinary.v2.config({
 });
 
 export const saveFileToCloudinary = async (file) => {
-  // Завантажуємо файл у Cloudinary
-  const response = await cloudinary.v2.uploader.upload(file.path);
-  // Видаляємо локальний файл після завантаження
-  await fs.unlink(file.path);
-  // Повертаємо посилання на файл у Cloudinary
-  return response.secure_url;
+  try {
+    // Завантажуємо файл у Cloudinary
+    const response = await cloudinary.v2.uploader.upload(file.path);
+    // Видаляємо локальний файл після завантаження
+    await fs.unlink(file.path);
+    // Повертаємо посилання на файл у Cloudinary
+    return response.secure_url;
+  } catch (err) {
+    // Додаємо логування для зручності дебагу
+    console.error('Cloudinary upload error:', err);
+    throw err;
+  }
 };
