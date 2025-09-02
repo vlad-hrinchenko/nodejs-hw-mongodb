@@ -47,4 +47,17 @@ router.post(
     ctrlWrapper(resetPasswordController),
 );
 
+router.post(
+  '/',
+  upload.single('photo'),  // Додаємо Multer
+  validateBody(createContactSchema),
+  ctrlWrapper(createContactController),
+);
+router.patch(
+  '/:contactId',
+  isValidId,
+  upload.single('photo'),  // Додаємо Multer
+  validateBody(patchContactSchema),
+  ctrlWrapper(updateContactController),
+);
 export default router;
