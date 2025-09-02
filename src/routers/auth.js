@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
@@ -25,16 +24,12 @@ router.post(
     ctrlWrapper(registerUserController),
 );
 
-router.post('/login', validateBody(loginUserSchema), loginUserController);
+router.post('/login', validateBody(loginUserSchema), ctrlWrapper(loginUserController));
 
-router.post(
-    '/refresh',
-    ctrlWrapper(refreshUserController),
-);
+router.post('/refresh', ctrlWrapper(refreshUserController));
 
 router.post('/logout', ctrlWrapper(logoutController));
 
-// --- HW6: Password Reset ---
 router.post(
     '/send-reset-email',
     validateBody(sendResetEmailSchema),
@@ -47,17 +42,4 @@ router.post(
     ctrlWrapper(resetPasswordController),
 );
 
-router.post(
-  '/',
-  upload.single('photo'),  // Додаємо Multer
-  validateBody(createContactSchema),
-  ctrlWrapper(createContactController),
-);
-router.patch(
-  '/:contactId',
-  isValidId,
-  upload.single('photo'),  // Додаємо Multer
-  validateBody(patchContactSchema),
-  ctrlWrapper(updateContactController),
-);
 export default router;
