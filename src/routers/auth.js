@@ -25,17 +25,13 @@ router.post(
 );
 
 router.post('/login', validateBody(loginUserSchema), ctrlWrapper(loginUserController));
-
 router.post('/refresh', ctrlWrapper(refreshUserController));
-
 router.post('/logout', ctrlWrapper(logoutController));
-
 router.post(
     '/send-reset-email',
     validateBody(sendResetEmailSchema),
     ctrlWrapper(sendResetEmailController),
 );
-
 router.post(
     '/reset-pwd',
     validateBody(resetPasswordSchema),
