@@ -25,3 +25,7 @@ export const resetPasswordSchema = Joi.object({
         'any.required': 'Password is required'
     }),
 });
+
+export const verifyGoogleOAuthValidationSchema = Joi.object({
+  code: Joi.string().required(),
+});

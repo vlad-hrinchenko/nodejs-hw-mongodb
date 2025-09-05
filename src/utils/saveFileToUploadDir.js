@@ -11,8 +11,8 @@ cloudinary.v2.config({
   api_secret: getEnvVar(CLOUDINARY.API_SECRET),
 });
 
-export const saveFileToCloudinary = async (file) => {
+export const saveFileToUploadDir = async (file) => {
   const response = await cloudinary.v2.uploader.upload(file.path);
-  await fs.unlink(file.path); // Видаляємо локальний файл після завантаження
+  await fs.unlink(file.path); // Видаляємо тимчасовий файл
   return response.secure_url;
 };

@@ -10,6 +10,9 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { TEMPLATES_DIR, SMTP } from '../constants/index.js';
 import { getEnvVar } from '../utils/getEnvVar.js';
+import { getAuthData } from '../utils/googleOauthClient.js';
+import { randomBytes } from 'node:crypto';
+import { Session } from 'node:inspector/promises';
 
 export const registerUser = async (payload) => {
     const { email, password, name } = payload;
@@ -226,4 +229,23 @@ export const requestResetToken = async (email) => {
     subject: 'Reset your password',
     html,
   });
+};
+
+export const verifyGoogleOAuthCode = async (code) => {
+    const authData = await getAuthData(code);
+    let user = await UsersCollection.findOne({ email: authData.email });
+
+    if (!user) {
+        user = await UsersCollection.create({
+            name: authData.name,
+            email: authData.email,
+            password: await bcrypt.hash(randomBytes(30), (10)),
+            avatarUrl: authData.picture,
+        });
+    }
+
+    await Session.findOneAndDelete({ userId: user._id })
+    
+    const session = await Session.create(createSession(user._id))
+    return session;
 };

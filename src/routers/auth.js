@@ -1,10 +1,10 @@
-
 import { Router } from 'express';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import {
     registerUserSchema,
     sendResetEmailSchema,
-    resetPasswordSchema
+    resetPasswordSchema,
+    verifyGoogleOAuthValidationSchema
 } from '../validation/auth.js';
 import {
     registerUserController,
@@ -12,7 +12,9 @@ import {
     logoutController,
     loginUserController,
     sendResetEmailController,
-    resetPasswordController
+    resetPasswordController,
+    getGoogleOauthSignInLinkController,
+    verifyGoogleOAuthCodeController
 } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { loginUserSchema } from '../validation/authSchemas.js';
@@ -25,22 +27,14 @@ router.post(
     ctrlWrapper(registerUserController),
 );
 
-router.post('/login', validateBody(loginUserSchema), loginUserController);
-
-router.post(
-    '/refresh',
-    ctrlWrapper(refreshUserController),
-);
-
+router.post('/login', validateBody(loginUserSchema), ctrlWrapper(loginUserController));
+router.post('/refresh', ctrlWrapper(refreshUserController));
 router.post('/logout', ctrlWrapper(logoutController));
-
-// --- HW6: Password Reset ---
 router.post(
     '/send-reset-email',
     validateBody(sendResetEmailSchema),
     ctrlWrapper(sendResetEmailController),
 );
-
 router.post(
     '/reset-pwd',
     validateBody(resetPasswordSchema),
@@ -48,16 +42,16 @@ router.post(
 );
 
 router.post(
-  '/',
-  upload.single('photo'),  // Додаємо Multer
-  validateBody(createContactSchema),
-  ctrlWrapper(createContactController),
+  
+    '/get-google-oauth-url',
+    ctrlWrapper(getGoogleOauthSignInLinkController),
 );
-router.patch(
-  '/:contactId',
-  isValidId,
-  upload.single('photo'),  // Додаємо Multer
-  validateBody(patchContactSchema),
-  ctrlWrapper(updateContactController),
+
+router.post(
+    '/verify-google-oauth-code',
+    validateBody(verifyGoogleOAuthValidationSchema),
+    ctrlWrapper(verifyGoogleOAuthCodeController),
 );
+
+
 export default router;
