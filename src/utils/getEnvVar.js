@@ -11,3 +11,10 @@ export function getEnvVar(name, defaultValue) {
 
     throw new Error(`Missing: process.env['${name}'].`);
 }
+
+export const ENV_VARS = {
+    GOOGLE_OAUTH_PROJECT_ID: 'GOOGLE_OAUTH_PROJECT_ID',
+    GOOGLE_OAUTH_CLIENT_ID: 'GOOGLE_OAUTH_CLIENT_ID',
+    GOOGLE_OAUTH_CLIENT_SECRET: 'GOOGLE_OAUTH_CLIENT_SECRET',
+    GOOGLE_OAUTH_REDIRECT_URI: 'GOOGLE_OAUTH_REDIRECT_URI',
+};

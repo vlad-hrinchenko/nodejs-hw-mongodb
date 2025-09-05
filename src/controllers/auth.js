@@ -10,11 +10,13 @@ import {
     resetPasswordWithToken
 } from '../services/auth.js';
 
+import { getGoogleOauthLink, verifyGoogleOAuthCode } from '../utils/googleOauthClient.js'; // ДОДАЙ ці імпорти
+
 export const registerUserController = async (req, res, next) => {
     try {
         const user = await registerUser(req.body);
 
-        await logoutSessionsByUserId(user._id); // remove old sessions first
+        await logoutSessionsByUserId(user._id);
 
         const { accessToken, refreshToken } = await createSession(user._id);
         const isProduction = process.env.NODE_ENV === 'production';
@@ -51,7 +53,7 @@ export const refreshUserController = async (req, res, next) => {
         res
             .cookie('refreshToken', newRefreshToken, {
                 httpOnly: true,
-                secure: isProduction, // увімкнути на https
+                secure: isProduction,
                 sameSite: 'strict',
             })
             .status(200)
@@ -73,10 +75,8 @@ export const logoutController = async (req, res, next) => {
             throw createHttpError(401, 'No refresh token provided');
         }
 
-        // Видаляємо сесію з бази
         await logoutSession(refreshToken);
 
-        // Видаляємо cookie
         res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -97,10 +97,9 @@ export const loginUserController = async (req, res, next) => {
 
         const isProduction = process.env.NODE_ENV === 'production';
 
-        // Записати refreshToken у cookie
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: isProduction, // true на https
+            secure: isProduction,
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
         });
@@ -132,7 +131,6 @@ export const sendResetEmailController = async (req, res, next) => {
 };
 
 export const resetPasswordController = async (req, res, next) => { 
-
     try {
         const { token, password } = req.body;
 
@@ -145,6 +143,35 @@ export const resetPasswordController = async (req, res, next) => {
         });
     } catch (error) {
         next(error);
+    }
+};
 
+// Google OAuth
+
+export const getGoogleOauthSignInLinkController = (req, res) => {
+    const url = getGoogleOauthLink();
+
+    res.json({
+        status: 200,
+        message: 'Successfully received Google OAuth url!',
+        data: { url },
+    });
+};
+
+export const verifyGoogleOAuthCodeController = async (req, res, next) => {
+    try {
+        const session = await verifyGoogleOAuthCode(req.body.code);
+
+        res.json({
+            status: 200,
+            message: 'Successfully authorized with Google OAuth',
+            data: {
+                accessToken: session.accessToken,
+                refreshToken: session.refreshToken,
+                user: session.user, // якщо повертаєш користувача
+            },
+        });
+    } catch (err) {
+        next(err);
     }
 };
