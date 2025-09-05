@@ -42,6 +42,7 @@ router.post(
 );
 
 router.post(
+  
     '/get-google-oauth-url',
     ctrlWrapper(getGoogleOauthSignInLinkController),
 );
@@ -51,5 +52,6 @@ router.post(
     validateBody(verifyGoogleOAuthValidationSchema),
     ctrlWrapper(verifyGoogleOAuthCodeController),
 );
+
 
 export default router;
