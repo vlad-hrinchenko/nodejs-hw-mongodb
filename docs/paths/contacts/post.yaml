@@ -1,10 +1,8 @@
-#/swagger/paths/students/post.yaml
-
 tags:
   - Contacts
 summary: Create contact
 operationId: createContact
-description: 'Create a contact with payload'
+description: Create a new contact with payload and optional photo upload
 security:
   - bearerAuth: []
 requestBody:
@@ -22,21 +20,22 @@ requestBody:
           name:
             description: "Contact's name"
             type: string
-            example: 'John Doe'
+            example: John Doe
           age:
             description: "Contact's age"
             type: number
             example: 12
           gender:
-            description: "Contact's age"
+            description: "Contact's gender"
             type: string
-            enum: ['male', 'female', 'other']
+            enum: [male, female, other]
+            example: male
           avgMark:
             description: "Contact's average mark. Should be between 1 and 12"
             type: number
             example: 9.7
           onDuty:
-            description: 'Whether is contact on duty'
+            description: Whether the contact is on duty
             type: boolean
             example: false
           parentId:
@@ -44,12 +43,12 @@ requestBody:
             type: string
             example: 65e4decdd286b30065d54af9
           photo:
-            description: "Contact's photo"
+            description: Contact's photo
             type: string
             format: binary
 responses:
   '201':
-    description: Creates a contact
+    description: Successfully created a new contact
     content:
       application/json:
         schema:
@@ -64,9 +63,8 @@ responses:
               example: 201
             message:
               type: string
-              example: Successfully created a contact!
+              example: Successfully created contact!
             data:
-              type: object
               $ref: '../../components/schemas/contact.yaml'
   '401':
     $ref: '../../components/responses/401.yaml'
