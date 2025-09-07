@@ -18,6 +18,10 @@ paths:
     post:
       $ref: ./paths/contacts/post.yaml
   /contacts/{contactId}:
+    delete:
+      $ref: ./paths/contacts/{contactId}/delete.yaml
+    patch:
+      $ref: ./paths/contacts/{contactId}/patch.yaml
     get:
       $ref: ./paths/contacts/{contactId}/get.yaml
 
