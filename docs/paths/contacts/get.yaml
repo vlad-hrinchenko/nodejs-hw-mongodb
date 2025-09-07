@@ -1,7 +1,7 @@
 tags:
   - Contacts
 summary: Create contact
-operationId: getContact
+operationId: getContacts
 description: 'Create a contact with payload'
 security:
   - bearerAuth: []

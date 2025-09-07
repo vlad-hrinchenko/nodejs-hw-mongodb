@@ -1,7 +1,7 @@
 tags:
   - Contacts
 summary: Get contact by id
-operationId: getContacts
+operationId: getContact
 description: Get a single contact by its unique ID
 security:
   - bearerAuth: []
