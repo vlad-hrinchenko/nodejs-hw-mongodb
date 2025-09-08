@@ -1,39 +1,50 @@
 tags:
   - Contacts
-summary: Update contact by id
+summary: Update contact
 operationId: updateContact
-description: Update a contact by its id
+description: Update fields of the contact
 security:
   - bearerAuth: []
 parameters:
-  - in: path
-    name: contactId
+  - name: contactId
+    in: path
     required: true
     schema:
       type: string
-      example: '65ca67e7ae7f10c88b598384'
+    description: Contact ID
 requestBody:
+  required: true
   content:
-    multipart/form-data:
+    application/json:
       schema:
         type: object
         properties:
           name:
             type: string
+            example: Jane Doe
           age:
-            type: number
+            type: integer
+            example: 13
           gender:
             type: string
-            enum: ['male', 'female', 'other']
+            enum: [male, female, other]
+            example: female
           avgMark:
             type: number
+            example: 9.8
+          parentId:
+            type: string
+            example: 65e4decdd286b30065d54af9
           photo:
             type: string
             format: binary
+            example: null
 responses:
   '200':
-    description: Contact updated successfully
+    description: Successfully updated contact
+    content:
+      application/json:
+        schema:
+          $ref: ../../../components/schemas/contact.yaml
   '401':
-    $ref: '../../../components/responses/401.yaml'
-  '404':
-    description: Contact not found
+    $ref: ../../../components/responses/401.yaml

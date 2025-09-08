@@ -1,8 +1,10 @@
 tags:
   - Contacts
-summary: Create new contact
+summary: Create a contact
 operationId: createContact
-description: Creates a new contact.
+description: Create a new contact
+security:
+  - bearerAuth: []
 requestBody:
   required: true
   content:
@@ -20,7 +22,7 @@ requestBody:
             type: string
             example: John Doe
           age:
-            type: number
+            type: integer
             example: 12
           gender:
             type: string
@@ -28,7 +30,7 @@ requestBody:
             example: male
           avgMark:
             type: number
-            example: 9.7
+            example: 10.5
           parentId:
             type: string
             example: 65e4decdd286b30065d54af9
@@ -38,7 +40,7 @@ requestBody:
             example: null
 responses:
   '201':
-    description: Successfully created contact
+    description: Created
     content:
       application/json:
         schema:
