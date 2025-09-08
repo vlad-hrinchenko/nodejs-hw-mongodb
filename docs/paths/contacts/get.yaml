@@ -1,8 +1,10 @@
 tags:
   - Contacts
-summary: Get all contacts with pagination
+summary: Get a paginated list of contacts
 operationId: getContacts
-description: Returns a paginated list of contacts.
+description: Returns contacts with pagination
+security:
+  - bearerAuth: []
 parameters:
   - name: page
     in: query
@@ -10,6 +12,7 @@ parameters:
     schema:
       type: integer
       minimum: 1
+      example: 1
     description: Page number
   - name: limit
     in: query
@@ -18,10 +21,11 @@ parameters:
       type: integer
       minimum: 1
       maximum: 100
-    description: Number of contacts per page
+      example: 10
+    description: Contacts per page
 responses:
   '200':
-    description: Paginated list of contacts
+    description: OK
     content:
       application/json:
         schema:
@@ -34,13 +38,13 @@ responses:
           properties:
             total:
               type: integer
-              example: 120
+              example: 56
             page:
               type: integer
               example: 1
             limit:
               type: integer
-              example: 20
+              example: 10
             contacts:
               type: array
               items:
