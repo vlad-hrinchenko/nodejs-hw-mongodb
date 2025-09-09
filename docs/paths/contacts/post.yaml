@@ -1,6 +1,6 @@
 tags:
   - Contacts
-summary: Create a contact
+summary: Create contact
 operationId: createContact
 description: Create a new contact
 security:
@@ -8,39 +8,36 @@ security:
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
         type: object
         required:
           - name
-          - age
-          - gender
-          - avgMark
-          - parentId
+          - phoneNumber
+          - contactType
         properties:
           name:
             type: string
-            example: John Doe
-          age:
-            type: integer
-            example: 12
-          gender:
+            example: 'Ivan Petrenko'
+          phoneNumber:
             type: string
-            enum: [male, female, other]
-            example: male
-          avgMark:
-            type: number
-            example: 10.5
-          parentId:
+            example: '+380671234567'
+          email:
             type: string
-            example: 65e4decdd286b30065d54af9
+            example: 'ivan@gmail.com'
+          isFavourite:
+            type: boolean
+            example: false
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            example: 'personal'
           photo:
             type: string
             format: binary
-            example: null
 responses:
   '201':
-    description: Created
+    description: Contact created successfully
     content:
       application/json:
         schema:

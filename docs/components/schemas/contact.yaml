@@ -3,36 +3,51 @@ required:
   - _id
   - name
   - phoneNumber
-  - email
   - contactType
+  - userId
+  - isFavourite
+  - createdAt
+  - updatedAt
 properties:
   _id:
-    description: "Contact's id"
     type: string
-    example: 65e4decdd286b30065d54af9
+    example: '65ca67e7ae7f10c88b598384'
+    description: MongoDB ObjectId
   name:
-    description: "Contact's name"
     type: string
-    example: 'John Doe'
+    example: 'Ivan Petrenko'
   phoneNumber:
-    description: "Contact's phone number"
     type: string
-    example: '+380931234567'
+    example: '+380671234567'
   email:
-    description: "Contact's email"
-    type: string
-    format: email
-    example: 'johndoe@example.com'
-  contactType:
-    description: 'Type of contact'
-    type: string
-    enum: ['personal', 'business']
-    example: 'personal'
+    type:
+      - string
+      - 'null'
+    example: 'ivan@gmail.com'
   isFavourite:
-    description: 'Whether the contact is marked as favourite'
     type: boolean
     example: false
-  photo:
-    description: "Link to contact's photo"
+  contactType:
     type: string
-    example: 'https://res.cloudinary.com/demo/image/upload/sample.jpg'
+    enum:
+      - work
+      - home
+      - personal
+    example: 'personal'
+  userId:
+    type: string
+    example: '65ca67e7ae7f10c88b598384'
+    description: MongoDB ObjectId of user
+  photo:
+    type:
+      - string
+      - 'null'
+    example: 'https://some-bucket.com/avatars/avatar.jpg'
+  createdAt:
+    type: string
+    format: date-time
+    example: '2025-09-09T03:32:37.000Z'
+  updatedAt:
+    type: string
+    format: date-time
+    example: '2025-09-09T03:32:37.000Z'
