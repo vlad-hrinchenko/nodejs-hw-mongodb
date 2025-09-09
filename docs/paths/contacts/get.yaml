@@ -1,8 +1,8 @@
 tags:
   - Contacts
-summary: Get a paginated list of contacts
-operationId: getContacts
-description: Returns contacts with pagination
+summary: Get all contacts
+operationId: getAllContacts
+description: Get a list of contacts with pagination and filtering
 security:
   - bearerAuth: []
 parameters:
@@ -11,41 +11,51 @@ parameters:
     required: false
     schema:
       type: integer
+      default: 1
       minimum: 1
-      example: 1
-    description: Page number
+    description: Page number for pagination
   - name: limit
     in: query
     required: false
     schema:
       type: integer
+      default: 20
       minimum: 1
-      maximum: 100
-      example: 10
-    description: Contacts per page
+    description: Number of contacts per page
+  - name: favourite
+    in: query
+    required: false
+    schema:
+      type: boolean
+    description: Filter by favourite status
+  - name: contactType
+    in: query
+    required: false
+    schema:
+      type: string
+      enum: [work, home, personal]
+    description: Filter by contact type
 responses:
   '200':
-    description: OK
+    description: List of contacts with pagination
     content:
       application/json:
         schema:
           type: object
-          required:
-            - total
-            - page
-            - limit
-            - contacts
           properties:
             total:
               type: integer
-              example: 56
+              example: 125
             page:
               type: integer
               example: 1
-            limit:
+            perPage:
               type: integer
-              example: 10
-            contacts:
+              example: 20
+            totalPages:
+              type: integer
+              example: 7
+            data:
               type: array
               items:
                 $ref: '../../components/schemas/contact.yaml'

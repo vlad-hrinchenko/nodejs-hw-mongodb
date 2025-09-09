@@ -1,36 +1,48 @@
 tags:
   - Contacts
-summary: Get contact by id
-operationId: getContact
-description: Get a single contact by its unique ID
+summary: Update contact
+operationId: updateContact
+description: Update contact fields
 security:
   - bearerAuth: []
 parameters:
   - name: contactId
     in: path
     required: true
-    description: ID of contact
     schema:
       type: string
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            example: 'Petro Ivanov'
+          phoneNumber:
+            type: string
+            example: '+380671234568'
+          email:
+            type: string
+            example: 'petro@gmail.com'
+          isFavourite:
+            type: boolean
+            example: true
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            example: 'work'
+          photo:
+            type: string
+            format: binary
 responses:
-  '201':
-    description: Successfully created contact
+  '200':
+    description: Successfully updated contact
     content:
       application/json:
         schema:
-          type: object
-          required:
-            - status
-            - message
-            - data
-          properties:
-            status:
-              type: integer
-              example: 201
-            message:
-              type: string
-              example: Successfully created contact!
-            data:
-              $ref: '../../../components/schemas/contact.yaml'
+          $ref: '../../../components/schemas/contact.yaml'
   '401':
     $ref: '../../../components/responses/401.yaml'
