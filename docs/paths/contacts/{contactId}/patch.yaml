@@ -1,17 +1,20 @@
 tags:
-  - Contacts
-summary: Update contact by id
-operationId: updateContactById
-description: Update contact fields by contact id
+  - Контакти
+summary: Часткове оновлення контакту з фото
+operationId: updateContact
+description: Оновлення окремих полів контакту за його унікальним ідентифікатором
 security:
   - bearerAuth: []
 parameters:
   - name: contactId
     in: path
     required: true
+    description: Унікальний ідентифікатор контакту
     schema:
       type: string
+      example: 65ca67e7ae7f10c88b598384
 requestBody:
+  description: Часткове оновлення контакту з фото
   required: true
   content:
     multipart/form-data:
@@ -20,45 +23,29 @@ requestBody:
         properties:
           name:
             type: string
-            example: Petro Ivanov
-          phoneNumber:
-            type: string
-            example: '+380671234568'
+            description: Ім'я контакту
           email:
             type: string
-            example: 'petro@gmail.com'
-          isFavourite:
-            type: boolean
-            example: true
-          contactType:
+            format: email
+            description: Email контакту
+          phone:
             type: string
-            enum:
-              - work
-              - home
-              - personal
-            example: work
+            description: Телефон контакту
           photo:
             type: string
             format: binary
+            description: Фото контакту
+      encoding:
+        photo:
+          contentType: image/jpeg, image/png
 responses:
   '200':
-    description: Successfully updated contact
+    description: Контакт успішно оновлено
     content:
       application/json:
         schema:
-          $ref: '../../../components/schemas/contact.yaml'
-  '401':
-    $ref: '../../../components/responses/401.yaml'
+          $ref: ../../../components/schemas/contact.yaml
   '404':
-    description: Contact not found
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            status:
-              type: integer
-              example: 404
-            message:
-              type: string
-              example: Contact not found
+    description: Контакт із зазначеним ID не знайдено
+  '400':
+    description: Неправильний запит (наприклад, некоректні дані)
