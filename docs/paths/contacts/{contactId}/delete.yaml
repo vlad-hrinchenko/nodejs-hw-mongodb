@@ -1,8 +1,8 @@
 tags:
-  - Контакти
-summary: Видалення контакту за ID
+  - Contacts
+summary: Delete contact by ID
 operationId: deleteContact
-description: Видаляє контакт за вказаним унікальним ідентифікатором
+description: Deletes a contact by the specified unique identifier
 security:
   - bearerAuth: []
 parameters:
@@ -12,13 +12,47 @@ parameters:
     schema:
       type: string
       example: 65ca67e7ae7f10c88b598384
-    description: Унікальний ідентифікатор контакту для видалення
+    description: Unique identifier of the contact to delete
 responses:
   '204':
-    description: Контакт успішно видалено, тіло відповіді відсутнє
+    description: Contact successfully deleted, no response body
+    content: {}
   '404':
-    description: Контакт із зазначеним ID не знайдено
+    description: Contact with the specified ID not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 404
+            message:
+              type: string
+              example: Contact not found
   '400':
-    description: Некоректний запит
+    description: Invalid request
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: Invalid contact ID
   '500':
-    description: Внутрішня помилка сервера
+    description: Internal server error
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 500
+            message:
+              type: string
+              example: Internal server error
